@@ -1,2 +1,4 @@
 *.sw*
+*.json
+*.csv
 node_modules/
