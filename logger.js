@@ -2,7 +2,6 @@ var http = require('http');
 var PORT = 6666;
 var MongoClient = require('mongodb').MongoClient;
 MongoClient.connect('mongodb://127.0.0.1:27017/sherlock', function(dberr, db){
-  var today = new Date();
 
   http.createServer(function(request, response){
       response.setHeader("Access-Control-Allow-Origin", "*");
@@ -32,6 +31,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/sherlock', function(dberr, db){
           });
           request.on("end", function(){
               try{
+                var today = new Date();
                 var components = request.url.split("/");
                 var exp_name = components[2];
                 var collection = db.collection(exp_name+"-"+today.getFullYear()+"-"+today.getMonth()+"-"+today.getDate());
