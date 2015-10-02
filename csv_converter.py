@@ -33,7 +33,7 @@ def get_relationship(card, rel):
 
 
 def generate_csv(data):
-  output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,\n'
+  output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
   users_seen = []
   cards_seen = set()
   for i, card in enumerate(data):
@@ -52,7 +52,17 @@ def generate_csv(data):
         potential_score = ''
         score = ''
         location = ''
-
+        blank = 0
+        empty = 0
+        failed = 0
+        mimic = 0
+        not_understood = 0
+        question = 0
+        
+        if content == '':
+          empty = 1
+          blank = 1
+      
         for card2 in data:
           if get_relationship(card2, 'is in reply to') == card['name']:
             reply = card2
@@ -64,8 +74,12 @@ def generate_csv(data):
             elif content == reply_content:
               reply_content = '[CE SAVED]'
               score = 1
+              if card['concept_id'] == nl_card_id:
+                mimic = 1
             elif 'Un-parseable input' in reply_content:
               reply_content = '[NOT UNDERSTOOD]'
+              failed = 1
+              not_understood = 1
                 
             break
         
@@ -96,9 +110,11 @@ def generate_csv(data):
             keystrokes = int(get_value(card, 'number of keystrokes'))
           except:
             pass
-        
+
+        if card['concept_id'] == ask_card_id:
+          question = 1
         cards_seen.add(card['name'])
-        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+'\n'
+        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
     
     except Exception as e:
       print e
