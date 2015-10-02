@@ -1,5 +1,6 @@
 var http = require('http');
 var exec = require('child_process').exec
+var url = require('url');
 
 var PORT = 8888;
 
@@ -9,8 +10,15 @@ http.createServer(function(request, response){
       response.end();
       return;
     }
-    if(request.url == '/'){
-      response.end('<html><body><h2>Mycroft</h2><a href="/restart-mycroft">Restart (or just start) Mycroft service</a><br /><a href="/stop-mycroft">Stop Mycroft</a><h2>Verity</h2><a href="/restart-verity">Restart (or just start) Verity service</a><br /><a href="/stop-verity">Stop Verity</a></body></html>');
+    if(request.url == '/' || request.url.indexOf('/?') == 0){
+      var status = url.parse(request.url, true).query.status;
+      console.log(status);
+
+      var html = '<html><body><h2>Mycroft</h2><a href="/restart-mycroft">Restart (or just start) Mycroft service</a><br /><a href="/stop-mycroft">Stop Mycroft</a><h2>Verity</h2><a href="/restart-verity">Restart (or just start) Verity service</a><br /><a href="/stop-verity">Stop Verity</a></body>';
+      if(status && status != ''){
+        html += '<script>window.alert("'+status+'");</script>';
+      }
+      response.end(html+'</html>');
     }
     else if(request.url == '/start-mycroft' || request.url == '/restart-mycroft'){
         console.log("Killing Mycroft");
@@ -28,7 +36,8 @@ http.createServer(function(request, response){
                         console.log(stderr);
                     }
                     console.log(stdout);
-                    response.end('<html><body>Mycroft is now running. Manage Mycroft at <a href="http://mycroft.cenode.io">mycroft.cenode.io</a>.</body></html>');
+                    response.writeHead(301, {Location: '/?status=Mycroft is now running.'});
+                    response.end();
                 });
             });
         });
@@ -37,7 +46,7 @@ http.createServer(function(request, response){
         console.log("Killing Mycroft");
         exec('tmux kill-session -t mycroft', {cwd: '/home/apps'}, function(err1, stdout1, stderr1){
            console.log('Killed'); 
-           response.writeHead(301, {Location: '/'});
+           response.writeHead(301, {Location: '/?status=Stopped Mycroft'});
            response.end();
         });
     }
@@ -57,7 +66,8 @@ http.createServer(function(request, response){
                         console.log(stderr);
                     }
                     console.log(stdout);
-                    response.end('<html><body>Verity restarted. Manage Verity at <a href="http://verity.cenode.io">verity.cenode.io</a>.</body></html>');
+                    response.writeHead(301, {Location: '/?status=Verity is now running.'});
+                    response.end();
                 });
             });
         });
@@ -66,7 +76,7 @@ http.createServer(function(request, response){
         console.log("Killing Verity");
         exec('tmux kill-session -t verity', {cwd: '/home/apps'}, function(err1, stdout1, stderr1){
           console.log('Killed'); 
-          response.writeHead(301, {Location: '/'});
+          response.writeHead(301, {Location: '/?status=Stopped Verity'});
           response.end();
         });
     }
