@@ -5,11 +5,12 @@ var url = require('url');
 var PORT = 8888;
 
 http.createServer(function(request, response){
-    if(request.method != 'GET'){
+    if(request.method != 'GET' || request.url == '/favicon.ico'){
       response.writeHead('405');
       response.end();
       return;
     }
+    console.log(request.url);
     if(request.url == '/' || request.url.indexOf('/?') == 0){
       console.log(new Date(), 'Homepage');
       var status = url.parse(request.url, true).query.status;
@@ -20,7 +21,7 @@ http.createServer(function(request, response){
       response.end(html+'</html>');
     }
     else if(request.url.indexOf('/start-mycroft') == 0 || request.url.indexOf('/restart-mycroft') == 0){
-        console.log(new Date(), "Killing Mycroft");
+        console.log(new Date(), "(Re)starting Mycroft");
         exec('tmux kill-session -t mycroft', {cwd: '/home/apps'}, function(err1, stdout1, stderr1){
             console.log(new Date(), stdout1);
             console.log(new Date(), "Launching new Mycroft session.");
@@ -35,7 +36,7 @@ http.createServer(function(request, response){
                         console.log(new Date(), stderr);
                     }
                     console.log(new Date(), stdout);
-                    response.writeHead(301, {Location: '/?status=Mycroft is now running.'});
+                    response.writeHead(302, {Location: '/?status=Mycroft is now running.'});
                     response.end();
                 });
             });
@@ -45,12 +46,12 @@ http.createServer(function(request, response){
         console.log(new Date(), "Killing Mycroft");
         exec('tmux kill-session -t mycroft', {cwd: '/home/apps'}, function(err1, stdout1, stderr1){
            console.log(new Date(), 'Killed'); 
-           response.writeHead(301, {Location: '/?status=Stopped Mycroft'});
+           response.writeHead(302, {Location: '/?status=Stopped Mycroft'});
            response.end();
         });
     }
     else if(request.url.indexOf('/start-verity') == 0 || request.url.indexOf('/restart-verity') == 0){
-        console.log(new Date(), "Killing Verity");
+        console.log(new Date(), "(Re)starting Verity");
         exec('tmux kill-session -t verity', {cwd: '/home/apps'}, function(err1, stdout1, stderr1){
             console.log(new Date(), stdout1);
             console.log(new Date(), "Launching new Verity session.");
@@ -65,7 +66,7 @@ http.createServer(function(request, response){
                         console.log(new Date(), stderr);
                     }
                     console.log(new Date(), stdout);
-                    response.writeHead(301, {Location: '/?status=Verity is now running.'});
+                    response.writeHead(302, {Location: '/?status=Verity is now running.'});
                     response.end();
                 });
             });
@@ -75,7 +76,7 @@ http.createServer(function(request, response){
         console.log(new Date(), "Killing Verity");
         exec('tmux kill-session -t verity', {cwd: '/home/apps'}, function(err1, stdout1, stderr1){
           console.log(new Date(), 'Killed'); 
-          response.writeHead(301, {Location: '/?status=Stopped Verity'});
+          response.writeHead(302, {Location: '/?status=Stopped Verity'});
           response.end();
         });
     }
