@@ -3,7 +3,7 @@
 # Script to convert JSON output from experiments into
 # wide CSV format for processing by US Army Research Labs.
 
-import json, time, datetime, urllib2, sys
+import json, time, datetime, urllib2, sys, os, re
 
 if len(sys.argv) != 2:
   print 'Usage: python csv_converter.py logURL'
@@ -11,15 +11,64 @@ if len(sys.argv) != 2:
 
 exp_name = sys.argv[1]
 
-confirm_card_id = 11
-nl_card_id = 10
-tell_card_id = 7
-ask_card_id = 8
-gist_card_id = 9
+types = {
+  11:'confirm',
+  10:'nl',
+  7:'tell',
+  8:'ask',
+  9:'gist'
+}
+
+questions = {
+  1:['pineapple', 'eat|like'],
+  2:['finch', 'play'],
+  3:['apple', 'eat|like'],
+  4:['crane', 'wear|shirt'],
+  6:['robin', 'in|room'],
+  7:['stork', 'wear|shirt'],
+  8:['stork', 'in|room'],
+  9:['emerald', 'in', 'contents'],
+  12:['banana', 'eat|like'],
+  13:['sapphire', 'in'],
+  17:['crane', 'play'],
+  18:['red', 'wear|shirt'],
+  19:['rugby', 'play'],
+  20:['hawk', 'eat|like'],
+  23:['robin', 'eat|like'],
+  24:['finch', 'wear|shirt'],
+  25:['apple', 'in|room'],
+  26:['yellow', 'wear|shirt'],
+  28:['silver', 'contains'],
+  30:['black', 'wear|shirt'],
+  31:['lemon', 'eat|like'],
+  33:['crane', 'eat|like'],
+  34:['baseball', 'play'],
+  35:['soccer', 'play'],
+  36:['stork', 'play'],
+  37:['ruby', 'contents', 'in'],
+  39:['golf', 'plays'],
+  40:['orange', 'eat|like'],
+  41:['falcon', 'wear|shirt'],
+  45:['amber', 'contents', 'in'],
+  47:['crane', 'in|room'],
+  48:['pear', 'in|room'],
+  50:['stork', 'eat|like'],
+  52:['robin', 'play'],
+  53:['falcon', 'in|room'],
+  54:['falcon', 'play']
+}
 
 def get_data():
-  response = urllib2.urlopen('http://logger.cenode.io/cards/'+exp_name)
-  return json.loads(response.read())
+  if os.path.isfile(exp_name):
+    exp_file = open(exp_name, 'r')
+    data = []
+    for line in exp_file.readlines():
+      data.append(json.loads(line))
+    exp_file.close()
+    return data
+  else:
+    response = urllib2.urlopen('http://logger.cenode.io/cards/'+exp_name)
+    return json.loads(response.read())
 
 def get_value(card, val):
   for value in card['values']:
@@ -33,7 +82,7 @@ def get_relationship(card, rel):
 
 
 def generate_csv(data):
-  output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
+  output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,type,aboutqs,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
   users_seen = []
   cards_seen = set()
   for i, card in enumerate(data):
@@ -69,12 +118,12 @@ def generate_csv(data):
             reply_timestamp = long(get_value(reply, 'timestamp'))
             reply_content = get_value(reply, 'content')
             response_time = (float(reply_timestamp) - float(timestamp)) / 1000
-            if reply['concept_id'] == confirm_card_id:
+            if types[reply['concept_id']] == 'confirm':
               potential_score = 1
             elif content == reply_content:
               reply_content = '[CE SAVED]'
               score = 1
-              if card['concept_id'] == nl_card_id:
+              if types[card['concept_id']] == 'nl':
                 mimic = 1
             elif 'Un-parseable input' in reply_content:
               reply_content = '[NOT UNDERSTOOD]'
@@ -87,7 +136,17 @@ def generate_csv(data):
         lon = get_value(card, 'longitude')
         if lat and lon:
           location = '('+str(lat)+'; '+str(lon)+')'
-         
+
+        pertinences = []
+        for q in questions: 
+          confidence = 0
+          for component in questions[q]:
+            rx = re.compile(r'\b'+component)
+            if rx.search(content.lower()):
+            #if component in content.lower():
+              confidence += 1
+          if confidence >= 2 and questions[q][0] in content.lower():
+            pertinences.append(str(q))
         
         timePOSIX = datetime.datetime.fromtimestamp(timestamp/1000).strftime('%Y-%m-%d %H:%M:%S')
         time = datetime.datetime.fromtimestamp(timestamp/1000).strftime('%H:%M:%S')
@@ -99,7 +158,15 @@ def generate_csv(data):
           users_seen.append(is_from.lower())
           user_number = len(users_seen) - 1
 
-        if card['concept_id'] == tell_card_id:
+        if types[card['concept_id']] == 'tell':
+          score = 1
+          tokens = content.split(' ')
+          for token in tokens:
+            if token.lower() == 'and':
+              score += 1
+          if not reply_content or reply_content == '':
+            reply_content = '[CE SAVED]'
+            
           try:
             start_time = long(get_value(card, 'start time'))
             submit_time = long(get_value(card, 'submit time'))
@@ -111,10 +178,10 @@ def generate_csv(data):
           except:
             pass
 
-        if card['concept_id'] == ask_card_id:
+        if types[card['concept_id']] == 'ask':
           question = 1
         cards_seen.add(card['name'])
-        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
+        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+types[card['concept_id']]+','+' '.join(pertinences)+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
     
     except Exception as e:
       print e
