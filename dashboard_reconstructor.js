@@ -17,22 +17,23 @@ var states = require('../data.js').states;
 var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CORE);
 var X = 5;
 
-var exp = states.experiment0;
+var exp = states.experiment1;
 
 var questions = node.concepts.question.instances;
 
 // Write CSV header
 var names = 'MINS';
 for(var i = 0; i < questions.length; i++){
-  names = names + ',' + questions[i].name;
+  names = names + ',q' + (i+1);
 }
 console.log(names);
 
-for(var i = 0; i < 50; i++){
+for(var i = 0; i <= 50; i++){
   node.add_sentences(exp[i]);
   if (i % X == 0){
     var instances = node.concepts.sherlock_thing.instances;
-    var states = i + '-' + (i+(X-1));
+    //var states = i + '-' + (i+(X-1));
+    var states = i;
     for(var j = 0; j < questions.length; j++){
       var q = questions[j];
 

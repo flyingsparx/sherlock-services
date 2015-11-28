@@ -71,10 +71,11 @@ for experiment in buckets:
     xs[experiment].append(bucket*granularity)
     ys[experiment].append(buckets[experiment][bucket])
 
-for y in ys:
-  for i, number in enumerate(y):
-    if i < len(y) - 1:
-      y[i+1] = y[i+1] + y[i]
+# cumulative
+#for y in ys:
+#  for i, number in enumerate(y):
+#    if i < len(y) - 1:
+#      y[i+1] = y[i+1] + y[i]
 
 plt.plot(xs[0], ys[0], experiments[0][2], xs[1], ys[1], experiments[1][2])
 plt.ylabel('Number of messages generated')

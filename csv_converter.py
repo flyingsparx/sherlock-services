@@ -24,38 +24,38 @@ questions = {
   2:['finch', 'play'],
   3:['apple', 'eat|like'],
   4:['crane', 'wear|shirt'],
-  6:['robin', 'in|room'],
-  7:['stork', 'wear|shirt'],
-  8:['stork', 'in|room'],
-  9:['emerald', 'in', 'contents'],
-  12:['banana', 'eat|like'],
-  13:['sapphire', 'in'],
-  17:['crane', 'play'],
-  18:['red', 'wear|shirt'],
-  19:['rugby', 'play'],
-  20:['hawk', 'eat|like'],
-  23:['robin', 'eat|like'],
-  24:['finch', 'wear|shirt'],
-  25:['apple', 'in|room'],
-  26:['yellow', 'wear|shirt'],
-  28:['silver', 'contains'],
-  30:['black', 'wear|shirt'],
-  31:['lemon', 'eat|like'],
-  33:['crane', 'eat|like'],
-  34:['baseball', 'play'],
-  35:['soccer', 'play'],
-  36:['stork', 'play'],
-  37:['ruby', 'contents', 'in'],
-  39:['golf', 'plays'],
-  40:['orange', 'eat|like'],
-  41:['falcon', 'wear|shirt'],
-  45:['amber', 'contents', 'in'],
-  47:['crane', 'in|room'],
-  48:['pear', 'in|room'],
-  50:['stork', 'eat|like'],
-  52:['robin', 'play'],
-  53:['falcon', 'in|room'],
-  54:['falcon', 'play']
+  5:['robin', 'in|room'],
+  6:['stork', 'wear|shirt'],
+  7:['stork', 'in|room'],
+  8:['emerald', 'in', 'contents'],
+  9:['banana', 'eat|like'],
+  10:['sapphire', 'in'],
+  11:['crane', 'play'],
+  12:['red', 'wear|shirt'],
+  13:['rugby', 'play'],
+  14:['hawk', 'eat|like'],
+  15:['robin', 'eat|like'],
+  16:['finch', 'wear|shirt'],
+  17:['apple', 'in|room'],
+  18:['yellow', 'wear|shirt'],
+  19:['silver', 'contains'],
+  20:['black', 'wear|shirt'],
+  21:['lemon', 'eat|like'],
+  22:['crane', 'eat|like'],
+  23:['baseball', 'play'],
+  24:['soccer', 'play'],
+  25:['stork', 'play'],
+  26:['ruby', 'contents', 'in'],
+  27:['golf', 'plays'],
+  28:['orange', 'eat|like'],
+  29:['falcon', 'wear|shirt'],
+  30:['amber', 'contents', 'in'],
+  31:['crane', 'in|room'],
+  32:['pear', 'in|room'],
+  33:['stork', 'eat|like'],
+  34:['robin', 'play'],
+  35:['falcon', 'in|room'],
+  36:['falcon', 'play']
 }
 
 def get_data():
@@ -80,16 +80,19 @@ def get_relationship(card, rel):
     if relationship['label'] == rel:
       return relationship['target_name'] 
 
-
 def generate_csv(data):
   output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,type,aboutqs,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
   users_seen = []
   cards_seen = set()
+  all_ids = set()
+  for card in data:
+    all_ids.add(card['name'])
   for i, card in enumerate(data):
     try:
       is_from = get_relationship(card, 'is from')
       content = get_value(card, 'content')
-      if content is not None and is_from and not ' agent' in is_from and not 'Sherlock' in is_from and card['name'] not in cards_seen and not 'there is an agent named' in content:
+      seen_timestamp = get_value(card, 'timestamp')
+      if content is not None and is_from and not ' agent' in is_from and not 'Sherlock' in is_from and (card['name'], seen_timestamp) not in cards_seen and not 'there is an agent named' in content:
         content = content.replace(',', '')
         timestamp = long(get_value(card, 'timestamp'))
         keystrokes = ''
@@ -129,7 +132,6 @@ def generate_csv(data):
               reply_content = '[NOT UNDERSTOOD]'
               failed = 1
               not_understood = 1
-                
             break
         
         lat = get_value(card, 'latitude')
@@ -161,6 +163,24 @@ def generate_csv(data):
         if types[card['concept_id']] == 'tell':
           score = 1
           tokens = content.split(' ')
+          in_reply_to = get_relationship(card, 'is in reply to')
+
+          # If we don't have a confirm card for this chain
+          if not in_reply_to in all_ids:
+            # If we don't have an NL
+            output = output + str(i)+'-NR'+','+exp_name.replace('/','-')+',0,'+str(user_number)+','+is_from+','+card['name']+'-NR,'+time+','+timePOSIX+','+'nl'+','+' '.join(pertinences)+','+'<assumed NL input>'+','+location+',,'+content+','+score+',,,,,0,0,0,0,0,0\n'
+          # if we don't have an nl card for this chain
+          else:
+            confirm_card = None
+            for card2 in data:
+              if card2['name'] == in_reply_to:
+                confirm_card = card2
+                break
+            if card2:
+              in_reply_to2 = get_relationship(confirm_card, 'is in reply to')
+              if not in_reply_to2 in all_ids:
+                output = output + str(i)+'-NR'+','+exp_name.replace('/','-')+',0,'+str(user_number)+','+is_from+','+card['name']+'-NR,'+time+','+timePOSIX+','+'nl'+','+' '.join(pertinences)+','+'<assumed NL input>'+','+location+',,'+content+','+str(score)+',,,,,0,0,0,0,0,0\n'
+
           for token in tokens:
             if token.lower() == 'and':
               score += 1
@@ -180,7 +200,8 @@ def generate_csv(data):
 
         if types[card['concept_id']] == 'ask':
           question = 1
-        cards_seen.add(card['name'])
+
+        cards_seen.add((card['name'], seen_timestamp))
         output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+types[card['concept_id']]+','+' '.join(pertinences)+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
     
     except Exception as e:
