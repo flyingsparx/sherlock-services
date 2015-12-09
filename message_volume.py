@@ -28,6 +28,13 @@ def get_relationship(card, rel):
     if relationship['label'] == rel:
       return relationship['target_name'] 
 
+def generate_card(name, timestamp):
+  card = {}
+  card['name'] = name
+  card['values'] = []
+  card['values'].append({'descriptor':'timestamp', 'type_name':timestamp})
+  return card
+
 def get_bucket(earliest, timestamp, interval_secs):
   diff = timestamp - earliest
   return math.floor(diff / interval_secs)
@@ -40,8 +47,42 @@ experiments = { # 08/10/15
 }
 
 seen_ids = []
+all_ids = set()
 buckets = {}
 granularity = 1
+
+for card in data:
+  all_ids.add(card['name'])
+
+print len(data)
+
+# add any 'missing' NR cards
+missing = []
+for card in data:
+  is_from = get_relationship(card, 'is from')
+  content = get_value(card, 'content')
+  if is_from and not ' agent' in is_from and not 'Sherlock' in is_from and not 'there is an agent named' in content:
+    if card['concept_id'] == 7:
+      confirm_id = get_relationship(card, 'is in reply to')
+      if not confirm_id:
+        print card
+        exit()
+
+      timestamp = get_value(card, 'timestamp')
+      if confirm_id not in all_ids:
+        missing.append(generate_card(confirm_id, timestamp))
+        missing.append(generate_card(confirm_id+'NR', timestamp))
+      else:
+        confirm_card = None
+        for card2 in data:
+          if card2['name'] == confirm_id:
+            confirm_card = card2
+            break
+        nl_id = get_relationship(confirm_card, 'is in reply to')
+        if nl_id not in all_ids:
+          missing.append(generate_card(nl_id, timestamp))
+for card in missing:
+  data.append(card)
 
 for card in data:
   timestamp = get_value(card, 'timestamp')
@@ -71,11 +112,8 @@ for experiment in buckets:
     xs[experiment].append(bucket*granularity)
     ys[experiment].append(buckets[experiment][bucket])
 
-# cumulative
-#for y in ys:
-#  for i, number in enumerate(y):
-#    if i < len(y) - 1:
-#      y[i+1] = y[i+1] + y[i]
+for y in ys[0]:
+  print y
 
 plt.plot(xs[0], ys[0], experiments[0][2], xs[1], ys[1], experiments[1][2])
 plt.ylabel('Number of messages generated')
