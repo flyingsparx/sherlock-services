@@ -9,7 +9,7 @@
 import json, time, datetime, urllib2, sys, os, re, math
 
 if len(sys.argv) != 2:
-  print 'Usage: python csv_converter.py logURL'
+  print 'Usage: python combined_cards.py logURL'
   exit()
 exp_name = sys.argv[1]
 
@@ -26,12 +26,12 @@ def get_data():
     return json.loads(response.read())
 
 def get_value(card, val):
-  for value in card['values']:
-    if value['descriptor'] == val:
+  for value in card['_values']:
+    if value['label'] == val:
       return value['type_name'] 
 
 def get_relationship(card, rel):
-  for relationship in card['relationships']:
+  for relationship in card['_relationships']:
     if relationship['label'] == rel:
       return relationship['target_name'] 
 

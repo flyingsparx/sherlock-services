@@ -19,12 +19,12 @@ def get_data():
     return json.loads(response.read())
 
 def get_value(card, val):
-  for value in card['values']:
-    if value['descriptor'] == val:
+  for value in card['_values']:
+    if value['label'] == val:
       return value['type_name'] 
 
 def get_relationship(card, rel):
-  for relationship in card['relationships']:
+  for relationship in card['_relationships']:
     if relationship['label'] == rel:
       return relationship['target_name'] 
 
@@ -32,7 +32,7 @@ def generate_card(name, timestamp):
   card = {}
   card['name'] = name
   card['values'] = []
-  card['values'].append({'descriptor':'timestamp', 'type_name':timestamp})
+  card['values'].append({'label':'timestamp', 'type_name':timestamp})
   return card
 
 def get_bucket(earliest, timestamp, interval_secs):
