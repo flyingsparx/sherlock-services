@@ -40,43 +40,28 @@ def get_bucket(earliest, timestamp, interval_secs):
   return math.floor(diff / interval_secs)
 
 data = get_data()
-
-experiments = { # 08/10/15
-  0: (1444309800, 1444312800),  # 14:10-15:00 (BST)
-  1: (1444313400, 1444316400)   # 15:10-16:00 (BST)
-}
-
 seen_ids = []
 buckets = {}
 granularity = 1
 
+earliest_time = 1450098000
+
 for card in data:
   timestamp = get_value(card, 'timestamp')
-  if (card['name'], timestamp) not in seen_ids and card['concept_id'] == 7:
+  if (card['name'], timestamp) not in seen_ids and card['type_id'] == 7:
     seen_ids.append((card['name'], timestamp))
     if timestamp:
       timestamp = int(timestamp)/1000
-      experiment = -1
-      for exp in experiments:
-        if timestamp >= experiments[exp][0] and timestamp <= experiments[exp][1]:
-          experiment = exp
-          break
-      if experiment != -1:
-        if experiment not in buckets:
-          buckets[experiment] = {}
-        bucket = int(get_bucket(experiments[experiment][0], timestamp, 60*granularity))
-        if bucket not in buckets[experiment]:
-          buckets[experiment][bucket] = []
-        buckets[experiment][bucket].append(get_value(card, 'content'))
+      bucket = int(get_bucket(earliest_time, timestamp, 60*granularity))
+      if bucket not in buckets:
+        buckets[bucket] = []
+      buckets[bucket].append(get_value(card, 'content'))
 
 print 'exports.states = {'
-for experiment in experiments:
-  print '  experiment'+str(experiment)+': {'
-  for i in range(50):
-    print '  ',i,': ['
-    if i in buckets[experiment]:
-      for card in buckets[experiment][i]:
-        print '    "',card+'",'
-    print '    ],'
-  print '  },'
-print '}'
+for i in range(50):
+  print '  ',i,': ['
+  if i in buckets:
+    for card in buckets[i]:
+      print '    "',card+'",'
+  print '    ],'
+print '  },'
