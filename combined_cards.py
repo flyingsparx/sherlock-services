@@ -9,7 +9,7 @@
 import json, time, datetime, urllib2, sys, os, re, math
 
 if len(sys.argv) != 2:
-  print 'Usage: python combined_cards.py logURL'
+  print 'Usage: python combined_cards.py file'
   exit()
 exp_name = sys.argv[1]
 
@@ -43,8 +43,12 @@ data = get_data()
 seen_ids = []
 buckets = {}
 granularity = 1
+earliest_time = None
 
-earliest_time = 1450098000
+for card in data:
+  timestamp = get_value(card, 'timestamp')
+  if timestamp and (earliest_time is None or ((int(timestamp) / 1000) < earliest_time)):
+    earliest_time = int(timestamp) / 1000
 
 for card in data:
   timestamp = get_value(card, 'timestamp')
@@ -64,4 +68,4 @@ for i in range(50):
     for card in buckets[i]:
       print '    "',card+'",'
   print '    ],'
-print '  },'
+print '  }'

@@ -2,7 +2,7 @@ import json, time, datetime, urllib2, sys, os, re, math
 import matplotlib.pyplot as plt
 
 if len(sys.argv) != 2:
-  print 'Usage: python csv_converter.py logURL'
+  print 'Usage: python message_volume.py file'
   exit()
 exp_name = sys.argv[1]
 
@@ -41,15 +41,18 @@ def get_bucket(earliest, timestamp, interval_secs):
 
 data = get_data()
 
-earliest_time = 1450098000
+earliest_time = None
 
 seen_ids = []
 all_ids = set()
 buckets = {}
-granularity = 1
+granularity = 5
 
 for card in data:
   all_ids.add(card['name'])
+  timestamp = get_value(card, 'timestamp')
+  if timestamp and earliest_time is None or ((int(timestamp) / 1000) < earliest_time):
+    earliest_time = int(timestamp) / 1000
 
 print len(data)
 

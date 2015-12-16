@@ -13,11 +13,9 @@ node dashboard_reconstructor.js > dashboard.csv
 
 var lib = require('../CENode/cenode.js');
 var models = require('../model.js');
-var states = require('../data.js').states;
+var states = require(process.argv[2]).states;
 var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CORE);
 var X = 5;
-
-var exp = states.experiment1;
 
 var questions = node.concepts.question.instances;
 
@@ -29,7 +27,7 @@ for(var i = 0; i < questions.length; i++){
 console.log(names);
 
 for(var i = 0; i <= 50; i++){
-  node.add_sentences(exp[i]);
+  node.add_sentences(states[i]);
   if (i % X == 0){
     var instances = node.concepts.sherlock_thing.instances;
     //var states = i + '-' + (i+(X-1));
