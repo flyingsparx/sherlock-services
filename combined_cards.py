@@ -4,7 +4,7 @@
 # tell cards (which seems to be the case).
 #
 # Example use:
-# python combined_cards.py <exp> > data.js
+# python combined_cards.py input.json > data.json
 
 import json, time, datetime, urllib2, sys, os, re, math
 

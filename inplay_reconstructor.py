@@ -1,3 +1,10 @@
+# Generate a CSV showing questions 'in play' in each <granularity>
+# minutes of the run.
+#
+# Uses data produced by combined_cards.py in one minute grnaularity.
+#
+# Usage: python inplay_reconstructor.py input.json > output.csv
+
 import json, time, datetime, urllib2, sys, os, re
 
 # Config:
