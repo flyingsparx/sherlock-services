@@ -12,12 +12,12 @@ node dashboard_reconstructor.js <data_file> > dashboard.csv
 */
 
 // Config:
-var X = 5; // Mins granularity
+var X = 1; // Mins granularity
 var model = '../model.js' // Model to preload KB with (usually contains characters/questions etc.)
 
 var lib = require('../CENode/cenode.js');
 var models = require(model);
-var states = require(process.argv[2]).states;
+var components = require(process.argv[2]).states;
 var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CORE);
 
 var questions = node.concepts.question.instances;
@@ -30,7 +30,10 @@ for(var i = 0; i < questions.length; i++){
 }
 
 for(var i = 0; i <= 50; i++){
-  node.add_sentences(states[i]);
+  if(components[i]){
+    node.add_sentences(components[i]);
+  }
+
   if (i % X == 0){
     var states = i;
     for(var j = 0; j < questions.length; j++){
