@@ -1,4 +1,4 @@
-import json, time, datetime, urllib2, sys, os
+import json, time, datetime, urllib2, sys, os, re
 
 # Config:
 granularity = 5
@@ -12,7 +12,7 @@ questions = {
   4:['crane', 'wear|shirt'], # what shirt does prof crane wear
   5:['robin', 'in|room'], # where is col robin
   6:['stork', 'wear|shirt', 'storm', 'stork blue'], # what shirt does sgt stork wear
- 29   7:['stork', 'in|room','sork amber', 'stork amber'], # where is stork
+  7:['stork', 'in|room','sork amber', 'stork amber'], # where is stork
   8:['emerald', 'in', 'contents', 'hawk emerald', 'hawk is at the'], # what char in emerald room
   9:['banana', 'eat|like', 'crane bananas', 'crane baanana', 'crane ears'], # who eats bananas
   10:['sapphire', 'in', 'the room sapphire room has the character col robin as contents'], # what char in sapphire room
@@ -40,7 +40,7 @@ questions = {
   32:['pear', 'in|room', 'pear emerald'], # where is pear
   33:['stork', 'eat|like|loves', 'storm', 'syork', 'stork lemon','stalk lemon'], # what fruit does stork eat
   34:['robin', 'play', 'robin rugby'], # what sport does robin play
-'falcon', 'in|room'], # where is falcon
+  35:['falcon', 'in|room'], # where is falcon
   36:['falcon', 'play','falcon soccer'] # what sport does falcon play
 }
 
@@ -55,36 +55,45 @@ question_nots = {
 def get_data():
   if os.path.isfile(input_file):
     exp_file = open(input_file, 'r')
-    data = []
-    for line in exp_file.readlines():
-      data.append(json.loads(line))
+    data = json.loads(exp_file.read())
     exp_file.close()
     return data
 
 data = get_data()
 
-in_plays = []
+in_plays = {}
+pertinences = set()
 
-for minute in data:
-  print minute
-  exit()
-  
-  pertinences = []
-  
-  stripped_content = content.lower().replace("'", "").replace(".", "")
-  for q in questions:
-    confidence = 0
-    for component in questions[q]:
-      rx = re.compile(r'\b'+component)
-      add = True
-      if rx.search(stripped_content):
-        if q in question_nots:
-          for no in question_nots[q]:
-            if no in stripped_content:
-              add = False
-        if add:
-          confidence += 1
-    if confidence >= 2 and questions[q][0] in stripped_content:
-      pertinences.append(str(q))
+print ','+','.join(str(i) for i in range(1, len(questions)+1))
 
-  in_plays.append(pertinences)
+for i in range(60):
+  
+  for sentence in data[str(i)]: 
+    stripped_content = sentence.lower().replace("'", "").replace(".", "")
+    for q in questions:
+      confidence = 0
+      for component in questions[q]:
+        rx = re.compile(r'\b'+component)
+        add = True
+        if rx.search(stripped_content):
+          if q in question_nots:
+            for no in question_nots[q]:
+              if no in stripped_content:
+                add = False
+          if add:
+            confidence += 1
+      if confidence >= 2 and questions[q][0] in stripped_content:
+        pertinences.add(q)
+  
+  if i % granularity == 0:
+    in_plays[i] = list(pertinences)
+    output = str(i)+','
+    for j, q in enumerate(questions):
+      if q in pertinences:
+        output = output + 'Y'
+      if j < len(questions)-1:
+        output = output + ','
+    print output
+
+    pertinences = set()
+
