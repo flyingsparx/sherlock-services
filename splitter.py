@@ -10,13 +10,15 @@ import json, sys, datetime
 f = sys.argv[1]
 out = sys.argv[2]
 
+#run 1: 08/10/2015 14:00-15:00
+#run 2: 08/10/2015 15:10-16:00
 #run 3: 14/12/2015 13:00-14:00
 #run 4: 16/12/2015 11:40-12:40
 #run 5: 16/12/2015 12:50-13:50
-startTime1 = datetime.datetime(2015, 12, 16, 12, 50)
-endTime1 = datetime.datetime(2015, 12, 16, 13, 50)
+start = datetime.datetime(2015, 10, 8, 14, 10)
+end = datetime.datetime(2015, 10, 8, 15, 00)
 
-ignore = ['alun', 'cat', 'cat2', 'cat3', 'egg', 'dove', 'bug', 'goa']
+ignore = [] # List of users to exclude
 
 exp_file = open(f, 'r')
 data = []
@@ -26,17 +28,28 @@ exp_file.close()
 
 def get_time(time):
   return (time - datetime.datetime(1970, 1, 1)).total_seconds()
-startTime1 = get_time(startTime1)
-endTime1 = get_time(endTime1)
+start = get_time(start)
+end = get_time(end)
 
 def get_value(card, val):
-  for value in card['_values']:
-    if value['label'] == val:
-      return value['type_name']
+  if '_values' in card:
+    for value in card['_values']:
+      if value['label'] == val:
+        return value['type_name']
+  elif 'values' in card:
+    for value in card['values']:
+      if value['descriptor'] == val:
+        return value['type_name']
 def get_relationship(card, relationship):
-  for rel in card['_relationships']:
-    if rel['label'] == relationship:
-      return rel['target_name']
+  if '_relationships' in card:
+    for rel in card['_relationships']:
+      if rel['label'] == relationship:
+        return rel['target_name']
+  elif 'relationships' in card:
+    for rel in card['relationships']:
+      if rel['label'] == relationship:
+        return rel['target_name']
+
 
 output1 = ''
 
@@ -47,7 +60,7 @@ for card in data:
   timestamp = get_value(card, 'timestamp')
   if timestamp:
     timestamp = int(timestamp) / 1000
-    if timestamp >= startTime1 and timestamp <= endTime1:
+    if timestamp >= start and timestamp <= end:
       output1 = output1 + json.dumps(card)+'\n'
 
 f1 = open(out, 'w')

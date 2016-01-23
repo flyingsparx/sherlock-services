@@ -11,7 +11,7 @@ if len(sys.argv) != 2:
 
 exp_name = sys.argv[1]
 
-types = {
+card_types = {
   11:'confirm',
   10:'nl',
   7:'tell',
@@ -79,14 +79,30 @@ def get_data():
     return json.loads(response.read())
 
 def get_value(card, val):
-  for value in card['_values']:
-    if value['label'] == val:
-      return value['type_name'] 
+  if '_values' in card: # CENode 2
+    for value in card['_values']:
+      if value['label'] == val:
+        return value['type_name'] 
+  elif 'values' in card: # CENode 1
+    for value in card['values']:
+      if value['descriptor'] == val:
+        return value['type_name'] 
 
 def get_relationship(card, rel):
-  for relationship in card['_relationships']:
-    if relationship['label'] == rel:
-      return relationship['target_name'] 
+  if '_relationships' in card: # CENode 2
+    for relationship in card['_relationships']:
+      if relationship['label'] == rel:
+        return relationship['target_name'] 
+  elif 'relationships' in card: # CENode 1
+    for relationship in card['relationships']:
+      if relationship['label'] == rel:
+        return relationship['target_name'] 
+
+def get_type(card):
+  if 'type_id' in card: # CENode 2
+    return card_types[card['type_id']]
+  elif 'concept_id' in card: # CENode 1
+    return card_types[card['concept_id']]
 
 def generate_csv(data):
   output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,type,aboutqs,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
@@ -129,12 +145,12 @@ def generate_csv(data):
             reply_timestamp = long(get_value(reply, 'timestamp'))
             reply_content = get_value(reply, 'content')
             response_time = (float(reply_timestamp) - float(timestamp)) / 1000
-            if types[reply['type_id']] == 'confirm':
+            if get_type(reply) == 'confirm':
               potential_score = 1
             elif content == reply_content:
               reply_content = '[CE SAVED]'
               score = 1
-              if types[card['type_id']] == 'nl':
+              if get_type(card) == 'nl':
                 mimic = 1
             elif 'Un-parseable input' in reply_content:
               reply_content = '[NOT UNDERSTOOD]'
@@ -174,7 +190,7 @@ def generate_csv(data):
           users_seen.append(is_from.lower())
           user_number = len(users_seen) - 1
 
-        if types[card['type_id']] == 'tell':
+        if get_type(card) == 'tell':
           score = 1
           tokens = content.split(' ')
           confirm_id = get_relationship(card, 'is in reply to')
@@ -212,11 +228,11 @@ def generate_csv(data):
           except:
             pass
 
-        if types[card['type_id']] == 'ask':
+        if get_type(card) == 'ask':
           question = 1
 
         cards_seen.add((card['name'], seen_timestamp))
-        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+types[card['type_id']]+','+' '.join(pertinences)+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
+        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+get_type(card)+','+' '.join(pertinences)+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
     
     #except Exception as e:
     #   print e

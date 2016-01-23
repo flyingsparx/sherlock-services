@@ -1,36 +1,37 @@
 /*
-Generate transient states for each question at each minute of an 
+Generate transient states for each question at each X minute of an 
 experiment (data for which produced by combined_cards.py).
 Each state is unanswered, unconfident, answered, or contested.
 
-Requires combined_cards.py to output in 1 minute granularities.
+Requires combined_cards.py to output in 1 minute granularities (<data_file> below).
 
 Generates output in CSV format for each question against time in X minute intervals.
 
 Example use:
-node dashboard_reconstructor.js > dashboard.csv
+node dashboard_reconstructor.js <data_file> > dashboard.csv
 */
 
+// Config:
+var X = 5; // Mins granularity
+var model = '../model.js' // Model to preload KB with (usually contains characters/questions etc.)
+
 var lib = require('../CENode/cenode.js');
-var models = require('../model.js');
+var models = require(model);
 var states = require(process.argv[2]).states;
 var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CORE);
-var X = 5;
 
 var questions = node.concepts.question.instances;
+node.add_sentence("the character 'Col Robin' is in the location 'Sapphire Room'");
 
 // Write CSV header
 var names = 'MINS';
 for(var i = 0; i < questions.length; i++){
   names = names + ',q' + (i+1);
 }
-console.log(names);
 
 for(var i = 0; i <= 50; i++){
   node.add_sentences(states[i]);
   if (i % X == 0){
-    var instances = node.concepts.sherlock_thing.instances;
-    //var states = i + '-' + (i+(X-1));
     var states = i;
     for(var j = 0; j < questions.length; j++){
       var q = questions[j];
