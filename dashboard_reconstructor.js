@@ -17,7 +17,7 @@ var model = '../model.js' // Model to preload KB with (usually contains characte
 
 var lib = require('../CENode/cenode.js');
 var models = require(model);
-var components = require(process.argv[2]).states;
+var components = require(process.argv[2]);
 var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CORE);
 
 var questions = node.concepts.question.instances;

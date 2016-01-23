@@ -87,11 +87,19 @@ for card in data:
         buckets[bucket] = []
       buckets[bucket].append(get_value(card, 'content'))
 
-print 'exports.states = {'
-for i in range(50):
-  print '  ',i,': ['
+print '{'
+for i in range(60):
+  print '  "'+str(i)+'": ['
   if i in buckets:
-    for card in buckets[i]:
-      print '    "',card+'",'
-  print '    ],'
+    for j, card in enumerate(buckets[i]):
+      print '    "'+card+'"',
+      if j < len(buckets[i])-1:
+        print ','
+      else:
+        print ''
+  print '    ]',
+  if i < 59:
+    print ','
+  else:
+    print ''
 print '  }'
