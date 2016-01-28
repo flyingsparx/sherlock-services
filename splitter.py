@@ -10,13 +10,13 @@ import json, sys, datetime
 f = sys.argv[1]
 out = sys.argv[2]
 
-#run 1: 08/10/2015 14:00-15:00
-#run 2: 08/10/2015 15:10-16:00
+#run 1: 08/10/2015 14:00-15:00 (consider BST - use an hour earlier)
+#run 2: 08/10/2015 15:10-16:00 (consider BST - use an hour earlier)
 #run 3: 14/12/2015 13:00-14:00
 #run 4: 16/12/2015 11:40-12:40
 #run 5: 16/12/2015 12:50-13:50
-start = datetime.datetime(2015, 10, 8, 14, 10)
-end = datetime.datetime(2015, 10, 8, 15, 00)
+start = datetime.datetime(2015, 12, 16, 12, 50)
+end = datetime.datetime(2015, 12, 16, 13, 50)
 
 ignore = [] # List of users to exclude
 

@@ -11,7 +11,7 @@ node response_volumes.js input.json > output.csv
 */
 
 // Config:
-var X = 5; // Mins granularity
+var X = 1; // Mins granularity
 var model = '../model.js' // Model to preload KB with (usually contains characters/questions etc.)
 
 var lib = require('../CENode/cenode.js');

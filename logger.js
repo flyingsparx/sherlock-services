@@ -6,6 +6,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/sherlock', function(dberr, db){
   http.createServer(function(request, response){
       response.setHeader("Access-Control-Allow-Origin", "*");
       if(request.method == "POST" && request.url.indexOf("/cards") == 0){
+          console.log(new Date(), 'POST', request.url);
           var body = "";
           request.on("data", function(chunk){
               body += chunk;
@@ -19,12 +20,12 @@ MongoClient.connect('mongodb://127.0.0.1:27017/sherlock', function(dberr, db){
                 collection.insert(JSON.parse(body));
               }
               catch(err){
-                console.log(err); 
+                console.log(new Date(), err); 
               }
               response.end();
           });
       }
   }).listen(PORT);
 
-  console.log("Card-logger listening on port "+PORT+".");
+  console.log(new Date(), "Card-logger listening on port "+PORT+".");
 });
