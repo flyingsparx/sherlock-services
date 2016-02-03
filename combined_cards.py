@@ -12,11 +12,11 @@ import json, time, datetime, urllib2, sys, os, re, math
 granularity = 1 # minutes
 
 card_types = {
-  11:'confirm',
-  10:'nl',
-  7:'tell',
-  8:'ask',
-  9:'gist'
+  11:'confirm card',
+  10:'nl card',
+  7:'tell card',
+  8:'ask card',
+  9:'gist card'
 }
 
 if len(sys.argv) != 2:
@@ -45,6 +45,8 @@ def get_value(card, val):
     for value in card['values']:
       if value['descriptor'] == val:
         return value['type_name'] 
+  elif val in card:
+    return card[val]
 
 def get_relationship(card, rel):
   if '_relationships' in card:
@@ -55,12 +57,16 @@ def get_relationship(card, rel):
     for relationship in card['relationships']:
       if relationship['label'] == rel:
         return relationship['target_name'] 
+  elif rel in card:
+    return card[rel]
 
 def get_type(card):
   if 'type_id' in card: # CENode 2
     return card_types[card['type_id']]
   elif 'concept_id' in card: # CENode 1
     return card_types[card['concept_id']]
+  elif 'type' in card:
+    return card['type']
 
 def get_bucket(earliest, timestamp, interval_secs):
   diff = timestamp - earliest
@@ -78,7 +84,7 @@ for card in data:
 
 for card in data:
   timestamp = get_value(card, 'timestamp')
-  if (card['name'], timestamp) not in seen_ids and get_type(card) == 'tell':
+  if (card['name'], timestamp) not in seen_ids and get_type(card) == 'tell card':
     seen_ids.append((card['name'], timestamp))
     if timestamp:
       timestamp = int(timestamp)/1000

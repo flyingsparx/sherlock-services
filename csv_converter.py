@@ -12,11 +12,11 @@ if len(sys.argv) != 2:
 exp_name = sys.argv[1]
 
 card_types = {
-  11:'confirm',
-  10:'nl',
-  7:'tell',
-  8:'ask',
-  9:'gist'
+  11:'confirm card',
+  10:'nl card',
+  7:'tell card',
+  8:'ask card',
+  9:'gist card'
 }
 
 questions = {
@@ -87,6 +87,9 @@ def get_value(card, val):
     for value in card['values']:
       if value['descriptor'] == val:
         return value['type_name'] 
+  elif val in card:
+    return card[val]
+    
 
 def get_relationship(card, rel):
   if '_relationships' in card: # CENode 2
@@ -97,12 +100,16 @@ def get_relationship(card, rel):
     for relationship in card['relationships']:
       if relationship['label'] == rel:
         return relationship['target_name'] 
+  elif rel in card:
+    return card[rel]
 
 def get_type(card):
   if 'type_id' in card: # CENode 2
     return card_types[card['type_id']]
   elif 'concept_id' in card: # CENode 1
     return card_types[card['concept_id']]
+  elif 'type' in card:
+    return card['type']
 
 def generate_csv(data):
   output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,type,aboutqs,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
@@ -145,12 +152,12 @@ def generate_csv(data):
             reply_timestamp = long(get_value(reply, 'timestamp'))
             reply_content = get_value(reply, 'content')
             response_time = (float(reply_timestamp) - float(timestamp)) / 1000
-            if get_type(reply) == 'confirm':
+            if get_type(reply) == 'confirm card':
               potential_score = 1
             elif content == reply_content:
               reply_content = '[CE SAVED]'
               score = 1
-              if get_type(card) == 'nl':
+              if get_type(card) == 'nl card':
                 mimic = 1
             elif 'Un-parseable input' in reply_content:
               reply_content = '[NOT UNDERSTOOD]'
@@ -190,7 +197,7 @@ def generate_csv(data):
           users_seen.append(is_from.lower())
           user_number = len(users_seen) - 1
 
-        if get_type(card) == 'tell':
+        if get_type(card) == 'tell card':
           score = 1
           tokens = content.split(' ')
           confirm_id = get_relationship(card, 'is in reply to')
@@ -228,7 +235,7 @@ def generate_csv(data):
           except:
             pass
 
-        if get_type(card) == 'ask':
+        if get_type(card) == 'ask card':
           question = 1
 
         cards_seen.add((card['name'], seen_timestamp))

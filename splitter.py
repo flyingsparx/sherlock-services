@@ -15,8 +15,9 @@ out = sys.argv[2]
 #run 3: 14/12/2015 13:00-14:00
 #run 4: 16/12/2015 11:40-12:40
 #run 5: 16/12/2015 12:50-13:50
-start = datetime.datetime(2015, 12, 16, 12, 50)
-end = datetime.datetime(2015, 12, 16, 13, 50)
+#run 6a: 02/02/2016 19:20-19:40 (Alun's dry run)
+start = datetime.datetime(2016, 2, 2, 19, 20)
+end = datetime.datetime(2016, 2, 2, 19, 40)
 
 ignore = [] # List of users to exclude
 
@@ -40,6 +41,9 @@ def get_value(card, val):
     for value in card['values']:
       if value['descriptor'] == val:
         return value['type_name']
+  elif val in card:
+    return card[val]
+
 def get_relationship(card, relationship):
   if '_relationships' in card:
     for rel in card['_relationships']:
@@ -49,6 +53,8 @@ def get_relationship(card, relationship):
     for rel in card['relationships']:
       if rel['label'] == relationship:
         return rel['target_name']
+  elif relationship in card:
+    return card[relationship]
 
 
 output1 = ''
