@@ -13,7 +13,7 @@ node dashboard_reconstructor.js <data_file> > dashboard.csv
 
 // Config:
 var X = 1; // Mins granularity
-var model = '../model.js' // Model to preload KB with (usually contains characters/questions etc.)
+var model = './model.js' // Model to preload KB with (usually contains characters/questions etc.)
 
 var lib = require('../CENode/cenode.js');
 var models = require(model);

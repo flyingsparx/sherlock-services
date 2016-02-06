@@ -2,7 +2,7 @@ import json, time, datetime, urllib2, sys, os, re, math
 import matplotlib.pyplot as plt
 
 if len(sys.argv) != 2:
-  print 'Usage: python message_volume.py file'
+  print 'Usage: python message_volume.py input.json'
   exit()
 exp_name = sys.argv[1]
 
@@ -19,20 +19,38 @@ def get_data():
     return json.loads(response.read())
 
 def get_value(card, val):
-  for value in card['_values']:
-    if value['label'] == val:
-      return value['type_name'] 
+  if '_values' in card:
+    for value in card['_values']:
+      if value['label'] == val:
+        return value['type_name'] 
+  elif val in card:
+    return card[val]
 
 def get_relationship(card, rel):
-  for relationship in card['_relationships']:
-    if relationship['label'] == rel:
-      return relationship['target_name'] 
+  if '_relationships' in card:
+    for relationship in card['_relationships']:
+      if relationship['label'] == rel:
+        return relationship['target_name'] 
+  elif rel in card:
+    return card[rel]
+
+def get_type(card):
+  types = {
+    11:'confirm card',
+    10:'nl card',
+    7:'tell card',
+    8:'ask card',
+    9:'gist card'
+  }
+  if 'type_id' in card:
+    return types[card['type_id']]
+  elif 'type' in card:
+    return card['type']
 
 def generate_card(name, timestamp):
   card = {}
   card['name'] = name
-  card['values'] = []
-  card['values'].append({'label':'timestamp', 'type_name':timestamp})
+  card['timestamp'] = timestamp
   return card
 
 def get_bucket(earliest, timestamp, interval_secs):
@@ -54,15 +72,13 @@ for card in data:
   if timestamp and earliest_time is None or ((int(timestamp) / 1000) < earliest_time):
     earliest_time = int(timestamp) / 1000
 
-print len(data)
-
 # add any 'missing' NR cards
 missing = []
 for card in data:
   is_from = get_relationship(card, 'is from')
   content = get_value(card, 'content')
-  if is_from and not ' agent' in is_from and not 'Sherlock' in is_from and not 'there is an agent named' in content:
-    if card['type_id'] == 7:
+  if content is not None and is_from is not None and not ' agent' in is_from and not 'Sherlock' in is_from and not 'there is an agent named' in content:
+    if get_type(card) == 'tell card':
       confirm_id = get_relationship(card, 'is in reply to')
       if confirm_id:
         timestamp = get_value(card, 'timestamp')
@@ -82,20 +98,19 @@ for card in missing:
   data.append(card)
 
 for card in data:
-  if '_values' in card:
-    timestamp = get_value(card, 'timestamp')
-    if (card['name'], timestamp) not in seen_ids:
-      seen_ids.append((card['name'], timestamp))
-      if timestamp:
-        timestamp = int(timestamp)/1000
-        bucket = int(get_bucket(earliest_time, timestamp, 60*granularity))
-        if bucket >= 0:
-          if bucket not in buckets:
-            buckets[bucket] = 0
-          buckets[bucket] += 1
-        else:
-          print datetime.datetime.fromtimestamp(timestamp),
-          print get_relationship(card, 'is from')
+  timestamp = get_value(card, 'timestamp')
+  if (card['name'], timestamp) not in seen_ids:
+    seen_ids.append((card['name'], timestamp))
+    if timestamp:
+      timestamp = int(timestamp)/1000
+      bucket = int(get_bucket(earliest_time, timestamp, 60*granularity))
+      if bucket >= 0:
+        if bucket not in buckets:
+          buckets[bucket] = 0
+        buckets[bucket] += 1
+      else:
+        print datetime.datetime.fromtimestamp(timestamp),
+        print get_relationship(card, 'is from')
 
 xs = []
 ys = []

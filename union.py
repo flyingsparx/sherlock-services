@@ -58,4 +58,5 @@ print conflict,"conflicting entries"
 out_writer = open(out_file, 'w')
 for entry in output:
   out_writer.write(json.dumps(entry))
+  out_writer.write('\n')
 out_writer.close()

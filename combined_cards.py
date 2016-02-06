@@ -98,7 +98,7 @@ for i in range(60):
   print '  "'+str(i)+'": ['
   if i in buckets:
     for j, card in enumerate(buckets[i]):
-      print '    "'+card+'"',
+      print '    "'+card.encode('utf-8').strip()+'"',
       if j < len(buckets[i])-1:
         print ','
       else:
