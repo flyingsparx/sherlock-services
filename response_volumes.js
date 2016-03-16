@@ -20,7 +20,6 @@ var components = require(process.argv[2]);
 var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CORE);
 
 var questions = node.concepts.question.instances;
-node.add_sentence("the character 'Col Robin' is in the location 'Sapphire Room'");
 
 // Write CSV header
 var names = 'MINS';
@@ -29,7 +28,7 @@ for(var i = 0; i < questions.length; i++){
 }
 console.log(names);
 
-for(var i = 0; i <= 50; i++){
+for(var i = 0; i <= 60; i++){
   if(components[i]){
     node.add_sentences(components[i]);
   }

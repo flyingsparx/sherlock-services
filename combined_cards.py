@@ -91,14 +91,17 @@ for card in data:
       bucket = int(get_bucket(earliest_time, timestamp, 60*granularity))
       if bucket not in buckets:
         buckets[bucket] = []
-      buckets[bucket].append(get_value(card, 'content'))
+      card_data = {}
+      card_data['content'] = get_value(card, 'content')
+      card_data['author'] = get_relationship(card, 'is from')
+      buckets[bucket].append(card_data)
 
 print '{'
 for i in range(60):
   print '  "'+str(i)+'": ['
   if i in buckets:
     for j, card in enumerate(buckets[i]):
-      print '    "'+card.encode('utf-8').strip()+'"',
+      print '    '+json.dumps(card).encode('utf-8').strip(),
       if j < len(buckets[i])-1:
         print ','
       else:

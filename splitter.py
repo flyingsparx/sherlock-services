@@ -17,8 +17,10 @@ out = sys.argv[2]
 #run 5: 16/12/2015 12:50-13:50
 #run 6: 04/02/2016 15:10-16:10
 #run 7: 04/02/2016 16:11-17:10
-start = datetime.datetime(2016, 2, 4, 16, 11)
-end = datetime.datetime(2016, 2, 4, 17, 10)
+#run 8: 10/02/2016 11:55-12:45
+#cwrun1: 02/03/2016 10:00-11:00
+start = datetime.datetime(2016, 3, 2, 9, 0)
+end = datetime.datetime(2016, 3, 2, 10, 0)
 
 ignore = [] # List of users to exclude
 

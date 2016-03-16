@@ -112,7 +112,7 @@ def get_type(card):
     return card['type']
 
 def generate_csv(data):
-  output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,type,aboutqs,content,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
+  output = ',Exprun,asktell,uniqueid,expid,id,time,POSIXtime,type,aboutqs,content,verbatim,location,pause,response,potentialscore,actualscore,timetorespond,keystrokes,Blank,Empty,Failed,Mimic,Not-understood,Question\n'
   users_seen = []
   cards_seen = set()
   all_ids = set()
@@ -237,9 +237,12 @@ def generate_csv(data):
 
         if get_type(card) == 'ask card':
           question = 1
+        verbatim = content
+        if 'verbatim' in card:
+          verbatim = card['verbatim']
 
         cards_seen.add((card['name'], seen_timestamp))
-        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+get_type(card)+','+' '.join(pertinences)+','+content+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
+        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+get_type(card)+','+' '.join(pertinences)+','+content+','+verbatim+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
     
     #except Exception as e:
     #   print e
@@ -247,7 +250,7 @@ def generate_csv(data):
 
 def write_csv(csv):
   f = open(exp_name.replace('/', '-')+'.csv', 'w')
-  f.write(csv)
+  f.write(csv.encode('utf8', 'replace'))
   f.close()
 
 data = get_data()
