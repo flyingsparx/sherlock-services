@@ -19,8 +19,8 @@ out = sys.argv[2]
 #run 7: 04/02/2016 16:11-17:10
 #run 8: 10/02/2016 11:55-12:45
 #cwrun1: 02/03/2016 10:00-11:00
-start = datetime.datetime(2016, 3, 2, 9, 0)
-end = datetime.datetime(2016, 3, 2, 10, 0)
+start = datetime.datetime(2015, 10, 8, 14, 10)
+end = datetime.datetime(2015, 10, 8, 15, 0)
 
 ignore = [] # List of users to exclude
 
@@ -47,6 +47,11 @@ def get_value(card, val):
   elif val in card:
     return card[val]
 
+def put_timestamp(card, val):
+  for value in card['values']:
+    if value['descriptor'] == 'timestamp':
+      value['type_name'] = str(val)
+
 def get_relationship(card, relationship):
   if '_relationships' in card:
     for rel in card['_relationships']:
@@ -64,9 +69,14 @@ output1 = ''
 
 for card in data:
   is_from = get_relationship(card, 'is from')
-  if is_from and is_from.lower() in ignore:
-    continue
   timestamp = get_value(card, 'timestamp')
+  if timestamp and is_from and is_from.lower() == 'doe':
+    timestamp = int(timestamp) - 1000 * 60 * 60
+    put_timestamp(card, timestamp)
+  if timestamp and is_from and is_from.lower() == 'snow':
+    timestamp = int(timestamp) + 1000 * 60 * 60 * 7
+    put_timestamp(card, timestamp)
+
   if timestamp:
     timestamp = int(timestamp) / 1000
     if timestamp >= start and timestamp <= end:
