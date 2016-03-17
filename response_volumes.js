@@ -32,7 +32,7 @@ for(var i = 0; i <= 60; i++){
   
   if(components[i]){
     for(var j = 0; j < components[i].length; j++){
-      node.add_sentence(components[i][j].content);
+      node.add_sentence(components[i][j].content, components[i][j].author);
     }
   }
 
@@ -44,17 +44,20 @@ for(var i = 0; i <= 60; i++){
       // Calculate all responses
       var concerns = node.instances[q.concerns.name.toLowerCase().replace(/ /, '_')];
       var property = q.relationship ? q.relationship : q.value;
-      var properties = concerns.properties(property);
+      var properties = concerns.properties(property, false, true);
       var responses = {}; 
       for(var k = 0; k < properties.length; k++){
-        var n = properties[k].name;
-        if(!(n in responses)){
-          responses[n] = 0;
+        var name = properties[k].instance.name;
+        if(!(name in responses)){
+          responses[name] = {};
+          responses[name].count = 0;
+          responses[name].blame = [];
         }
-        responses[n]++;
+        responses[name].count++;
+        responses[name].blame.push(properties[k].blame);
       }
       for(response in responses){
-        states += response+' ('+responses[response]+') '
+        states += response+' ('+responses[response].count+')' +'['+ responses[response].blame.join(';')+'] '
       }
       states += ','
     }
