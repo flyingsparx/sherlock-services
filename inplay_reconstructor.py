@@ -76,7 +76,7 @@ print ','+','.join(str(i) for i in range(1, len(questions)+1))
 for i in range(60):
   
   for sentence in data[str(i)]: 
-    stripped_content = sentence.lower().replace("'", "").replace(".", "")
+    stripped_content = sentence['content'].lower().replace("'", "").replace(".", "")
     for q in questions:
       confidence = 0
       for component in questions[q]:
