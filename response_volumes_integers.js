@@ -32,7 +32,9 @@ console.log(names);
 
 for(var i = 0; i <= 60; i++){
   if(components[i]){
-    node.add_sentences(components[i]);
+    for(var j = 0; j < components[i].length; j++){
+      node.add_sentence(components[i][j].content);
+    }
   }
 
   if (i % X == 0){
@@ -54,7 +56,7 @@ for(var i = 0; i <= 60; i++){
       }
       var sum_answers = 0
       for(response in responses){
-        sum_answers += responses[response]
+        sum_answers += parseInt(responses[response])
       }
       states += sum_answers + ','
     }

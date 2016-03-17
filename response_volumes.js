@@ -29,8 +29,11 @@ for(var i = 0; i < questions.length; i++){
 console.log(names);
 
 for(var i = 0; i <= 60; i++){
+  
   if(components[i]){
-    node.add_sentences(components[i]);
+    for(var j = 0; j < components[i].length; j++){
+      node.add_sentence(components[i][j].content);
+    }
   }
 
   if (i % X == 0){
