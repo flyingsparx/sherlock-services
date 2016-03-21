@@ -23,12 +23,20 @@ def get_value(card, val):
     for value in card['_values']:
       if value['label'] == val:
         return value['type_name'] 
+  elif 'values' in card:
+    for value in card['values']:
+      if value['descriptor'] == val:
+        return value['type_name']
   elif val in card:
     return card[val]
 
 def get_relationship(card, rel):
   if '_relationships' in card:
     for relationship in card['_relationships']:
+      if relationship['label'] == rel:
+        return relationship['target_name'] 
+  elif 'relationships' in card:
+    for relationship in card['relationships']:
       if relationship['label'] == rel:
         return relationship['target_name'] 
   elif rel in card:
@@ -69,7 +77,7 @@ granularity = 5
 for card in data:
   all_ids.add(card['name'])
   timestamp = get_value(card, 'timestamp')
-  if timestamp and earliest_time is None or ((int(timestamp) / 1000) < earliest_time):
+  if timestamp and (earliest_time is None or ((int(timestamp) / 1000) < earliest_time)):
     earliest_time = int(timestamp) / 1000
 
 # add any 'missing' NR cards
