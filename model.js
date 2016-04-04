@@ -162,7 +162,7 @@ exports.SHERLOCK_CW = [
   "there is a fruit named 'grape'",
   "there is a fruit named 'kiwi'",
   "there is a fruit named 'tomato'",
-  "there is a coloured hat named 'gwrdd'",
+  "there is a coloured hat named 'gwyrdd'",
   "there is a coloured hat named 'coch'",
   "there is a coloured hat named 'glas'",
   "there is a coloured hat named 'pinc'",
