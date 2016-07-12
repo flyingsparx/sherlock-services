@@ -18,7 +18,7 @@ var model = './model.js' // Model to preload KB with (usually contains character
 var lib = require('../CENode/cenode.js');
 var models = require(model);
 var components = require(process.argv[2]);
-var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_CW);
+var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_NEW);
 
 var questions = node.concepts.question.instances;
 
@@ -74,10 +74,10 @@ for(var i = 0; i <= 50; i++){
       if(highest == 0){
         q.state = 'unanswered';
       }
-      else if(highest < 3){
+      else if(highest < 5){
         q.state = 'unconfident';
       }
-      else if((highest - prev_highest) >=3 ){
+      else if((highest - prev_highest) >=5 ){
         q.state = 'answered';
       }
       else{

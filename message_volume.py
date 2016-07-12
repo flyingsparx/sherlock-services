@@ -139,8 +139,14 @@ for buckets in results:
   x.append(xs)
   y.append(ys)
 
-plt.plot(x[0], y[0], 'r-', label = "Run 6")
-plt.plot(x[1], y[1], 'b-', label = "Run 7")
+x = list(set(x[0]) | set(x[1]))
+x.sort()
+for ys in y:
+  while len(ys) < len(x):
+    ys.append(0)
+
+plt.plot(x, y[0], 'r-', label = "Group C")
+plt.plot(x, y[1], 'b--', label = "Group D")
 plt.legend(loc='upper right');
 plt.ylabel('Number of messages generated')
 plt.xlabel('Minutes since experiment start')
