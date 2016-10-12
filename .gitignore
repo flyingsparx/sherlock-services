@@ -3,4 +3,5 @@
 *.csv
 *.png
 node_modules/
+output_data/
 .DS_Store

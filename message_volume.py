@@ -78,7 +78,7 @@ for data in data_sets:
   seen_ids = []
   all_ids = set()
   buckets = {}
-  granularity = 5
+  granularity = 2
   results.append(buckets)
 
   for card in data:
@@ -139,14 +139,16 @@ for buckets in results:
   x.append(xs)
   y.append(ys)
 
-x = list(set(x[0]) | set(x[1]))
+#x = list(set(x[0]) | set(x[1]))
 x.sort()
 for ys in y:
   while len(ys) < len(x):
     ys.append(0)
 
-plt.plot(x, y[0], 'r-', label = "Group C")
-plt.plot(x, y[1], 'b--', label = "Group D")
+print x
+print y[0]
+plt.plot(x[0], y[0], 'r-', label = "10/10/16 Group 1")
+#plt.plot(x, y[1], 'b--', label = "Group D")
 plt.legend(loc='upper right');
 plt.ylabel('Number of messages generated')
 plt.xlabel('Minutes since experiment start')
