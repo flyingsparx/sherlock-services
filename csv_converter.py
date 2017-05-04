@@ -211,7 +211,7 @@ def generate_csv(data):
           # If we don't have a confirm card for this chain
           if not confirm_id in all_ids:
             # If we don't have an NL
-            output = output + str(i)+'-NR'+','+exp_name.replace('/','-')+',0,'+str(user_number)+','+is_from+','+card['name']+'-NR,'+time+','+timePOSIX+','+'nl'+','+' '.join(pertinences)+','+'<assumed NL input>'+','+location+',,'+content+','+str(score)+',,,,0,0,0,0,0,0\n'
+            output = output + str(i)+'-NR'+','+exp_name.replace('/','-')+',0,'+str(user_number)+','+is_from+','+card['name']+'-NR,'+time+','+timePOSIX+','+'nl'+','+' '.join(pertinences)+','+'<assumed NL input>'+','+content.replace(',','')+','+location+',,'+content.replace(',','')+','+str(score)+',,,,0,0,0,0,0,0\n'
           # if we don't have an nl card for this chain
           else:
             confirm_card = None
@@ -222,7 +222,7 @@ def generate_csv(data):
             if card2:
               nl_id = get_relationship(confirm_card, 'is in reply to')
               if nl_id not in all_ids:
-                output = output + str(i)+'-NR'+','+exp_name.replace('/','-')+',0,'+str(user_number)+','+is_from+','+card['name']+'-NR,'+time+','+timePOSIX+','+'nl'+','+' '.join(pertinences)+','+'<assumed NL input>'+','+location+',,'+content+','+str(score)+',,,,0,0,0,0,0,0\n'
+                output = output + str(i)+'-NR'+','+exp_name.replace('/','-')+',0,'+str(user_number)+','+is_from+','+card['name']+'-NR,'+time+','+timePOSIX+','+'nl'+','+' '.join(pertinences)+','+'<assumed NL input>'+','+content.replace(',','')+','+location+',,'+content.replace(',','')+','+str(score)+',,,,0,0,0,0,0,0\n'
 
           try:
             start_time = long(get_value(card, 'start time'))
@@ -242,7 +242,7 @@ def generate_csv(data):
           verbatim = card['verbatim']
 
         cards_seen.add((card['name'], seen_timestamp))
-        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+get_type(card)+','+' '.join(pertinences)+','+content+','+verbatim+','+location+','+str(pause)+','+reply_content+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
+        output = output + str(i)+','+exp_name.replace('/', '-')+',0,'+str(user_number)+','+is_from+','+card['name']+','+time+','+timePOSIX+','+get_type(card)+','+' '.join(pertinences)+','+content.replace(',','')+','+verbatim+','+location+','+str(pause)+','+reply_content.replace(',','')+','+str(potential_score)+','+str(score)+','+str(response_time)+','+str(keystrokes)+','+str(blank)+','+str(empty)+','+str(failed)+','+str(mimic)+','+str(not_understood)+','+str(question)+'\n'
     
     #except Exception as e:
     #   print e

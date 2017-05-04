@@ -14,10 +14,11 @@ node response_volumes.js input.json > output.csv
 var X = 1; // Mins granularity
 var model = './model.js' // Model to preload KB with (usually contains characters/questions etc.)
 
-var lib = require('../CENode/cenode.js');
+var lib = require('./CENode.js');
+var coreModel = require('../CENode/models/core.js');
 var models = require(model);
 var components = require(process.argv[2]);
-var node = new lib.CENode(lib.MODELS.CORE, models.SHERLOCK_NEW);
+var node = new lib.CENode(coreModel, models.SHERLOCK_NEW);
 
 var questions = node.concepts.question.instances;
 

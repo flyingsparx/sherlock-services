@@ -78,7 +78,7 @@ for data in data_sets:
   seen_ids = []
   all_ids = set()
   buckets = {}
-  granularity = 2
+  granularity = 5
   results.append(buckets)
 
   for card in data:
@@ -147,7 +147,7 @@ for ys in y:
 
 print x
 print y[0]
-plt.plot(x[0], y[0], 'r-', label = "10/10/16 Group 1")
+plt.plot(x[0], y[0], 'r-')
 #plt.plot(x, y[1], 'b--', label = "Group D")
 plt.legend(loc='upper right');
 plt.ylabel('Number of messages generated')
